@@ -40,7 +40,7 @@ coltable=/opt/pihole/COL_TABLE
 
 # We store several other folders and
 webInterfaceGitUrl="https://github.com/pi-hole/AdminLTE.git"
-webInterfaceDir="/var/www/html/admin"
+webInterfaceDir="/var/www/pihole"
 piholeGitUrl="https://github.com/pi-hole/pi-hole.git"
 PI_HOLE_LOCAL_REPO="/etc/.pihole"
 # These are the names of pi-holes files, stored in an array
@@ -1265,8 +1265,8 @@ installConfigs() {
         # and copy in the config file Pi-hole needs
         cp ${PI_HOLE_LOCAL_REPO}/advanced/${LIGHTTPD_CFG} /etc/lighttpd/lighttpd.conf
         # if there is a custom block page in the html/pihole directory, replace 404 handler in lighttpd config
-        if [[ -f "/var/www/html/pihole/custom.php" ]]; then
-            sed -i 's/^\(server\.error-handler-404\s*=\s*\).*$/\1"pihole\/custom\.php"/' /etc/lighttpd/lighttpd.conf
+        if [[ -f "$webInterfaceDir/block/custom.php" ]]; then
+            sed -i 's/^\(server\.error-handler-404\s*=\s*\).*$/\1"block\/custom\.php"/' /etc/lighttpd/lighttpd.conf
         fi
         # Make the directories if they do not exist and set the owners
         mkdir -p /var/run/lighttpd
@@ -1535,13 +1535,13 @@ installPiholeWeb() {
     local str="Creating directory for blocking page, and copying files"
     echo -ne "  ${INFO} ${str}..."
     # Install the directory
-    install -d /var/www/html/pihole
+    install -d "$webInterfaceDir/block"
     # and the blockpage
-    install -D ${PI_HOLE_LOCAL_REPO}/advanced/{index,blockingpage}.* /var/www/html/pihole/
+    install -D ${PI_HOLE_LOCAL_REPO}/advanced/{index,blockingpage}.* "$webInterfaceDir/block"
 
     # Remove superseded file
-    if [[ -e "/var/www/html/pihole/index.js" ]]; then
-        rm "/var/www/html/pihole/index.js"
+    if [[ -e "$webInterfaceDir/block/index.js" ]]; then
+        rm "$webInterfaceDir/block//index.js"
     fi
 
     echo -e "${OVER}  ${TICK} ${str}"
@@ -1757,9 +1757,9 @@ installPihole() {
 
     # If the user wants to install the Web interface,
     if [[ "${INSTALL_WEB_INTERFACE}" == true ]]; then
-        if [[ ! -d "/var/www/html" ]]; then
+        if [[ ! -d "$webInterfaceDir" ]]; then
             # make the Web directory if necessary
-            mkdir -p /var/www/html
+            mkdir -p $webInterfaceDir
         fi
 
         if [[ "${INSTALL_WEB_SERVER}" == true ]]; then
